@@ -743,12 +743,6 @@
       window.addEventListener("keydown", event => {
         if (event.key === "Escape") closePicker();
         if (event.key.toLowerCase() === "r" && event.altKey) document.querySelector("#resetBtn").click();
-        const digit = Number(event.key);
-        if (digit >= 1 && digit <= 5) {
-          const slotIndex = event.shiftKey ? 1 : 0;
-          if (!state.slots[digit - 1]?.[slotIndex]) return;
-          triggerSlot(digit - 1, slotIndex);
-        }
       });
 
       makeDraggable();
