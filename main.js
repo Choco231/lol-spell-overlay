@@ -97,10 +97,6 @@ ipcMain.handle("overlay:close", () => {
   mainWindow?.close();
 });
 
-ipcMain.handle("overlay:click-through", (_event, enabled) => {
-  return false;
-});
-
 ipcMain.handle("overlay:reset-window", () => {
   if (!mainWindow) return;
   mainWindow.setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);

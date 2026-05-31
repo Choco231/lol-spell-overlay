@@ -711,10 +711,6 @@
         window.overlayAPI?.close();
       });
 
-      window.overlayAPI?.onClickThroughChanged(enabled => {
-        setClickThroughUi(enabled);
-      });
-
       document.querySelector("#soundBtn").addEventListener("click", event => {
         state.sound = !state.sound;
         event.currentTarget.textContent = state.sound ? "소리 ON" : "소리 OFF";
@@ -756,14 +752,6 @@
       });
 
       makeDraggable();
-    }
-
-    function setClickThroughUi(enabled) {
-      const button = document.querySelector("#clickThroughBtn");
-      if (!button) return;
-      button.classList.toggle("active", enabled);
-      button.textContent = enabled ? "통과" : "클릭";
-      flash(enabled ? "오버레이 클릭이 게임으로 통과합니다. Ctrl+Shift+O로 해제하세요." : "오버레이 조작 모드입니다.");
     }
 
     function renderBoard() {
