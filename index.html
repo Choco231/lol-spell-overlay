@@ -317,6 +317,18 @@
       display: none;
     }
 
+    .opacity-control {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      -webkit-app-region: no-drag;
+    }
+
+    .opacity-control input {
+      width: 72px;
+      accent-color: var(--accent);
+    }
+
     .compact .actions {
       gap: 3px;
       flex-wrap: nowrap;
@@ -613,12 +625,8 @@
 <body class="compact">
   <main class="app" id="app">
     <header class="topbar" id="dragHandle">
-      <div class="title">
-        <div class="mark">S</div>
-        <div>
-          <h1>롤 스펠 체크 오버레이</h1>
-          <div class="sub">상대가 스펠을 쓰면 아이콘을 클릭하세요. 다시 누르면 취소됩니다.</div>
-        </div>
+      <div class="opacity-control">
+        <input type="range" id="topOpacity" min="45" max="100" value="78" title="투명도">
       </div>
       <div class="actions">
         <button id="closeBtn" class="danger electron-only" title="닫기">X</button>
@@ -770,10 +778,16 @@
         });
       });
 
-      document.querySelector("#opacity").addEventListener("input", event => {
-        document.documentElement.style.setProperty("--bg", `rgba(8, 11, 18, ${event.target.value / 100})`);
+      const opacityInput = document.querySelector("#opacity");
+      const topOpacityInput = document.querySelector("#topOpacity");
+      const applyOpacity = value => {
+        document.documentElement.style.setProperty("--bg", `rgba(8, 11, 18, ${value / 100})`);
+        opacityInput.value = value;
+        topOpacityInput.value = value;
         saveState();
-      });
+      };
+      opacityInput.addEventListener("input", event => applyOpacity(event.target.value));
+      topOpacityInput.addEventListener("input", event => applyOpacity(event.target.value));
 
       window.addEventListener("keydown", event => {
         if (event.key === "Escape") closePicker();
@@ -999,6 +1013,7 @@
           document.querySelector("#ionian").checked = Boolean(data.ionian);
           document.querySelector("#unleashed").checked = Boolean(data.unleashed);
           document.querySelector("#opacity").value = data.opacity || "78";
+          document.querySelector("#topOpacity").value = data.opacity || "78";
           document.querySelector("#soundBtn").textContent = state.sound ? "소리 ON" : "소리 OFF";
           document.querySelector("#opacity").dispatchEvent(new Event("input"));
         });
