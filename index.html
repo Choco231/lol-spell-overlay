@@ -326,13 +326,35 @@
 
     .opacity-control input {
       width: 64px;
-      accent-color: #151923;
+      height: 14px;
+      appearance: none;
+      -webkit-appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .opacity-control input::-webkit-slider-runnable-track {
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(8, 11, 18, .9);
+      border: 1px solid rgba(0, 0, 0, .45);
+    }
+
+    .opacity-control input::-webkit-slider-thumb {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 11px;
+      height: 11px;
+      margin-top: -4px;
+      border-radius: 50%;
+      background: rgba(12, 15, 22, .98);
+      border: 1px solid rgba(255, 255, 255, .22);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .75);
     }
 
     .compact .actions {
       gap: 3px;
       flex-wrap: nowrap;
-      padding-right: 3px;
     }
 
     .compact .actions button {
@@ -342,6 +364,8 @@
     }
 
     .compact #closeBtn {
+      position: relative;
+      left: -4px;
       background: rgba(0, 0, 0, .38);
       border-color: rgba(255, 255, 255, .16);
       color: rgba(255, 255, 255, .72);
