@@ -325,7 +325,7 @@
     }
 
     .opacity-control input {
-      width: 72px;
+      width: 64px;
       accent-color: var(--accent);
     }
 
@@ -630,7 +630,6 @@
       </div>
       <div class="actions">
         <button id="closeBtn" class="danger electron-only" title="닫기">X</button>
-        <button id="resetBtn" class="danger" title="모든 타이머 초기화">R</button>
       </div>
     </header>
 
@@ -741,15 +740,6 @@
     }
 
     function bindControls() {
-      document.querySelector("#resetBtn").addEventListener("click", () => {
-        state.slots.flat().forEach(slot => {
-          slot.startedAt = 0;
-          slot.duration = 0;
-        });
-        saveState();
-        renderBoard();
-      });
-
       document.querySelector("#closeBtn")?.addEventListener("click", () => {
         window.overlayAPI?.close();
       });
@@ -781,7 +771,7 @@
       const opacityInput = document.querySelector("#opacity");
       const topOpacityInput = document.querySelector("#topOpacity");
       const applyOpacity = value => {
-        document.documentElement.style.setProperty("--bg", `rgba(8, 11, 18, ${value / 100})`);
+        document.querySelector("#app").style.opacity = value / 100;
         opacityInput.value = value;
         topOpacityInput.value = value;
         saveState();
@@ -791,7 +781,6 @@
 
       window.addEventListener("keydown", event => {
         if (event.key === "Escape") closePicker();
-        if (event.key.toLowerCase() === "r" && event.altKey) document.querySelector("#resetBtn").click();
       });
 
       makeDraggable();
