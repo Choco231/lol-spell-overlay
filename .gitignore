@@ -1,5 +1,6 @@
 node_modules/
 .overlay-user-data/
+.electron-download/
 overlay-debug.log
 overlay-runtime.log
 npm-debug.log*
