@@ -386,25 +386,11 @@
       display: none;
     }
 
-    .lane-toggle img,
-    .quest-icon {
+    .lane-toggle img {
       width: 100%;
       height: 100%;
       display: block;
       border-radius: 3px;
-    }
-
-    .quest-icon {
-      position: relative;
-      background:
-        linear-gradient(135deg, rgba(255, 230, 142, .95), rgba(130, 86, 28, .95));
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .35);
-      display: grid;
-      place-items: center;
-      color: #16100a;
-      font-size: 10px;
-      font-weight: 900;
-      line-height: 1;
     }
 
     .lane-toggle:has(input:checked) {
@@ -666,6 +652,7 @@
     const LANES = ["TOP", "JUG", "MID", "ADC", "SUP"];
     const IONIAN_ICON = `${CDN}/img/item/3158.png`;
     const COSMIC_ICON = "https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/Inspiration/CosmicInsight/CosmicInsight.png";
+    const QUEST_ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23d8b45c'/%3E%3Cpath d='M16 4l9 5v8c0 5.5-3.7 9.2-9 11-5.3-1.8-9-5.5-9-11V9l9-5z' fill='%237a511d'/%3E%3Cpath d='M16 7l6 3.4v5.8c0 3.8-2.2 6.5-6 8-3.8-1.5-6-4.2-6-8v-5.8L16 7z' fill='%23ffe68e'/%3E%3Ctext x='16' y='20.5' text-anchor='middle' font-family='Arial,sans-serif' font-size='12' font-weight='900' fill='%2316100a'%3EQ%3C/text%3E%3C/svg%3E";
     const DEFAULT_MODS = LANES.map(() => ({ cosmic: false, ionian: false, unleashed: false }));
     const DEFAULTS = [
       ["SummonerFlash", "SummonerTeleport"],
@@ -821,7 +808,7 @@
         ? `<img src="${IONIAN_ICON}" alt="${title}">`
         : icon === "cosmic"
           ? `<img src="${COSMIC_ICON}" alt="${title}">`
-          : `<span class="quest-icon" aria-label="${title}">Q</span>`;
+          : `<img src="${QUEST_ICON}" alt="${title}">`;
       return `<label class="lane-toggle" title="${title}"><input type="checkbox" data-lane-mod="${mod}" ${checked}>${content}</label>`;
     }
 
