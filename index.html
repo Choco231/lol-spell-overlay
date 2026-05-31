@@ -40,7 +40,7 @@
       background: transparent;
       min-height: auto;
       overflow: hidden;
-      padding: 4px;
+      padding: 0;
     }
 
     .app {
@@ -286,7 +286,11 @@
     }
 
     .compact .app {
-      width: 154px;
+      width: 138px;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      backdrop-filter: none;
     }
 
     .compact .controls {
@@ -294,8 +298,10 @@
     }
 
     .compact .topbar {
-      gap: 4px;
-      padding: 4px;
+      gap: 2px;
+      padding: 3px 1px 2px 2px;
+      background: rgba(2, 6, 13, .72);
+      border-bottom: 1px solid rgba(255, 255, 255, .08);
     }
 
     .compact .mark {
@@ -325,7 +331,7 @@
     }
 
     .opacity-control input {
-      width: 64px;
+      width: 58px;
       height: 14px;
       appearance: none;
       -webkit-appearance: none;
@@ -353,8 +359,9 @@
     }
 
     .compact .actions {
-      gap: 3px;
+      gap: 0;
       flex-wrap: nowrap;
+      margin-left: auto;
     }
 
     .compact .actions button {
@@ -365,14 +372,15 @@
 
     .compact #closeBtn {
       position: relative;
-      left: -4px;
+      left: -7px;
       background: rgba(0, 0, 0, .38);
       border-color: rgba(255, 255, 255, .16);
       color: rgba(255, 255, 255, .72);
     }
 
     .compact .panel {
-      padding: 3px;
+      padding: 2px;
+      background: rgba(2, 6, 13, .72);
     }
 
     .compact .board {
@@ -382,8 +390,8 @@
     .compact .row {
       grid-template-columns: 48px 1fr;
       min-height: 36px;
-      padding: 2px;
-      gap: 3px;
+      padding: 1px 0;
+      gap: 2px;
       border: 0;
       border-radius: 0;
       background: transparent;

@@ -5,7 +5,7 @@ const { app, BrowserWindow, globalShortcut, ipcMain, screen } = require("electro
 let mainWindow;
 const logPath = path.join(__dirname, "overlay-debug.log");
 const userDataPath = path.join(__dirname, ".overlay-user-data");
-const DEFAULT_WIDTH = 150;
+const DEFAULT_WIDTH = 140;
 const DEFAULT_HEIGHT = 272;
 
 fs.mkdirSync(userDataPath, { recursive: true });
