@@ -715,6 +715,8 @@
     const IONIAN_ICON = `${CDN}/img/item/3158.png`;
     const COSMIC_ICON = "https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/Inspiration/CosmicInsight/CosmicInsight.png";
     const TOP_ICON = "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-parties/global/default/icon-position-top.png";
+    const TOP_QUEST_TELEPORT_ID = "TopQuestTeleport";
+    const TOP_QUEST_TELEPORT_SPELL = { id: TOP_QUEST_TELEPORT_ID, name: "TOP 퀘스트 텔", cooldown: 420, icon: TOP_ICON };
     const DEFAULT_MODS = LANES.map(() => ({ cosmic: false, ionian: false, unleashed: false }));
     const DEFAULTS = [
       ["SummonerFlash", "SummonerTeleport"],
@@ -837,7 +839,7 @@
             <div class="lane-options">
               ${renderLaneToggle(rowIndex, "ionian", "ionian", "아이오니아 장화")}
               ${renderLaneToggle(rowIndex, "cosmic", "cosmic", "우주적 통찰력")}
-              ${rowIndex === 0 ? renderLaneToggle(rowIndex, "unleashed", "top", "TOP: 강화 텔레포트") : ""}
+              ${rowIndex === 0 ? renderLaneToggle(rowIndex, "unleashed", "top", "기존 텔레포트 강화") : ""}
             </div>
             <span>${rowIndex + 1} / Shift+${rowIndex + 1}</span>
           </div>
@@ -908,7 +910,9 @@
 
     function renderPicker() {
       spellPicker.innerHTML = "";
-      state.spells.forEach(spell => {
+      const [rowIndex] = state.picker || [];
+      const pickerSpells = rowIndex === 0 ? [TOP_QUEST_TELEPORT_SPELL, ...state.spells] : state.spells;
+      pickerSpells.forEach(spell => {
         const button = document.createElement("button");
         button.className = "pick";
         button.title = spell.name;
@@ -927,6 +931,7 @@
 
     function openPicker(rowIndex, slotIndex) {
       state.picker = [rowIndex, slotIndex];
+      renderPicker();
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
     }
@@ -977,6 +982,7 @@
 
     function baseCooldown(spell, rowIndex = 0) {
       const mods = state.mods[rowIndex] || DEFAULT_MODS[rowIndex] || DEFAULT_MODS[0];
+      if (spell.id === TOP_QUEST_TELEPORT_ID) return 420;
       if (rowIndex === 0 && spell.id === "SummonerTeleport" && mods.unleashed) return 240;
       return spell.cooldown;
     }
@@ -991,10 +997,12 @@
     }
 
     function fallbackById(id) {
+      if (id === TOP_QUEST_TELEPORT_ID) return TOP_QUEST_TELEPORT_SPELL;
       return FALLBACK_SPELLS.find(spell => spell.id === id);
     }
 
     function iconUrl(spell) {
+      if (spell.icon) return spell.icon;
       return `${CDN}/img/spell/${spell.file}`;
     }
 
@@ -1011,7 +1019,7 @@
         sound: state.sound,
         cosmic: document.querySelector("#cosmic")?.checked || false,
         ionian: document.querySelector("#ionian")?.checked || false,
-        unleashed: document.querySelector("#unleashed")?.checked || false,
+        unleashed: state.mods[0]?.unleashed || false,
         opacity: document.querySelector("#opacity")?.value || "78"
       };
       localStorage.setItem("lol-spell-overlay", JSON.stringify(data));
@@ -1039,7 +1047,7 @@
         requestAnimationFrame(() => {
           document.querySelector("#cosmic").checked = Boolean(data.cosmic);
           document.querySelector("#ionian").checked = Boolean(data.ionian);
-          document.querySelector("#unleashed").checked = Boolean(data.unleashed);
+          document.querySelector("#unleashed").checked = Boolean(state.mods[0]?.unleashed);
           document.querySelector("#opacity").value = data.opacity || "78";
           document.querySelector("#topOpacity").value = data.opacity || "78";
           document.querySelector("#soundBtn").textContent = state.sound ? "소리 ON" : "소리 OFF";
@@ -1053,7 +1061,11 @@
     function normalizeSlots() {
       state.slots = DEFAULTS.map((defaults, rowIndex) => {
         const existing = Array.isArray(state.slots[rowIndex]) ? state.slots[rowIndex] : [];
-        const cleaned = existing.filter(slot => slot?.id && slot.id !== "SummonerSmite");
+        const cleaned = existing.filter(slot => {
+          if (!slot?.id || slot.id === "SummonerSmite") return false;
+          if (slot.id === TOP_QUEST_TELEPORT_ID && rowIndex !== 0) return false;
+          return true;
+        });
         return defaults.map((defaultId, slotIndex) => {
           const slot = cleaned[slotIndex] || { id: defaultId, startedAt: 0, duration: 0 };
           return {
