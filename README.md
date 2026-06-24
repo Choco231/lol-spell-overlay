@@ -61,6 +61,18 @@ npm.cmd install
 npm.cmd start
 ```
 
+## AWS Lightsail VPS 동기화 서버
+
+여러 사람이 다른 네트워크에서 안정적으로 동기화하려면 AWS Lightsail Seoul 같은 VPS에 동기화 서버를 24시간 실행하는 방식을 권장합니다.
+
+VPS에는 오버레이 창을 띄우지 않고 `sync-server.js`만 systemd 서비스로 실행합니다. 각 사용자 PC는 기존 오버레이를 설치한 뒤 `클라이언트_실행.cmd`에서 VPS 주소를 입력합니다.
+
+```text
+http://서버공인IP:17898
+```
+
+Lightsail 설정과 설치 명령은 [docs/AWS_LIGHTSAIL_SETUP.md](docs/AWS_LIGHTSAIL_SETUP.md)를 보세요.
+
 ## 기본 조작
 
 - 상단 바 드래그: 오버레이 위치 이동

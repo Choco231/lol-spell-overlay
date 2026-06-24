@@ -5,7 +5,8 @@
   "main": "main.js",
   "private": true,
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "sync-server": "node sync-server.js"
   },
   "devDependencies": {
     "electron": "^31.7.7"

@@ -117,7 +117,10 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log("LoL Spell Sync Server is running.");
   console.log(`Port: ${PORT}`);
   console.log("");
-  console.log("Share one of these addresses with clients on the same network:");
+  console.log("Client URL examples:");
+  console.log(`  http://<server-public-ip>:${PORT}`);
+  console.log("");
+  console.log("Detected local addresses:");
   for (const address of localAddresses()) {
     console.log(`  http://${address}:${PORT}`);
   }

@@ -1,0 +1,18 @@
+[Unit]
+Description=LoL Spell Overlay Sync Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/lol-spell-overlay
+ExecStart=/usr/bin/node /opt/lol-spell-overlay/sync-server.js
+Environment=LOL_SPELL_SYNC_PORT=17898
+Restart=always
+RestartSec=2
+User=lolspell
+Group=lolspell
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

@@ -11,7 +11,7 @@ if not exist "node_modules\electron\dist\electron.exe" (
 
 echo.
 echo Enter the server URL shared by the host.
-echo Example: http://100.78.213.33:17898
+echo Example: http://13.125.10.20:17898
 echo.
 set /p SERVER_URL=Server URL: 
 
