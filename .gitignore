@@ -6,5 +6,7 @@ overlay-runtime.log
 sync-client-config.json
 sync-server-runtime.log
 sync-server-runtime.err.log
+server-test.out.log
+server-test.err.log
 npm-debug.log*
 *.tmp

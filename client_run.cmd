@@ -28,5 +28,6 @@ echo Saved server URL.
 echo Starting overlay...
 echo.
 
-start "" wscript.exe "%~dp0?????_??????_???.vbs"
+start "" wscript.exe "%~dp0run-overlay.vbs"
+
 
