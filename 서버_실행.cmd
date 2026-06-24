@@ -1,2 +1,3 @@
 @echo off
-call "%~dp0server-start.cmd"
+call "%~dp0server_run.cmd"
+

@@ -1,2 +1,3 @@
 @echo off
-call "%~dp0setup-and-run.cmd"
+call "%~dp0install_run.cmd"
+

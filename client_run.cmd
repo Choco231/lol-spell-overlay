@@ -3,6 +3,12 @@ setlocal
 
 cd /d "%~dp0"
 
+if not exist "node_modules\electron\dist\electron.exe" (
+  echo Electron is not installed. Run install_run.cmd first.
+  pause
+  exit /b 1
+)
+
 echo.
 echo Enter the server URL shared by the host.
 echo Example: http://100.78.213.33:17898
@@ -18,7 +24,9 @@ if "%SERVER_URL%"=="" (
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$url = '%SERVER_URL%'.Trim().TrimEnd('/'); $cfg = [ordered]@{ enabled = $true; serverUrl = $url; canControl = $true }; $cfg | ConvertTo-Json | Set-Content -LiteralPath 'sync-client-config.json' -Encoding UTF8"
 
 echo.
-echo Saved sync-client-config.json
-echo Now run start-overlay.cmd or the VBS launcher.
+echo Saved server URL.
+echo Starting overlay...
 echo.
-pause
+
+start "" wscript.exe "%~dp0?????_??????_???.vbs"
+
