@@ -21,21 +21,27 @@ if "%SERVER_URL%"=="" (
 )
 
 echo.
-echo Enter a room code. People using the same room code share spell timers.
-echo Use English letters, numbers, dash, or underscore. Example: team1
+echo Select a room. People using the same room share spell timers.
+echo 1. team1
+echo 2. team2
+echo 3. team3
 echo.
-set /p ROOM_CODE=Room code: 
+set /p ROOM_NUMBER=Room number [1-3]: 
+
+if "%ROOM_NUMBER%"=="1" set "ROOM_CODE=team1"
+if "%ROOM_NUMBER%"=="2" set "ROOM_CODE=team2"
+if "%ROOM_NUMBER%"=="3" set "ROOM_CODE=team3"
 
 if "%ROOM_CODE%"=="" (
-  echo No room code entered.
+  echo Invalid room number. Enter 1, 2, or 3.
   pause
   exit /b 1
 )
 
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$url = $env:SERVER_URL.Trim().TrimEnd('/'); $room = $env:ROOM_CODE.Trim().ToLower() -replace '[^a-z0-9_-]+','-'; $room = $room.Trim('-'); if (-not $room) { throw 'Invalid room code' }; $cfg = [ordered]@{ enabled = $true; serverUrl = $url; room = $room; canControl = $true }; $cfg | ConvertTo-Json | Set-Content -LiteralPath 'sync-client-config.json' -Encoding UTF8"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$url = $env:SERVER_URL.Trim().TrimEnd('/'); $room = $env:ROOM_CODE; $cfg = [ordered]@{ enabled = $true; serverUrl = $url; room = $room; canControl = $true }; $cfg | ConvertTo-Json | Set-Content -LiteralPath 'sync-client-config.json' -Encoding UTF8"
 
 if errorlevel 1 (
-  echo Failed to save sync config. Use only English letters, numbers, dash, or underscore for room code.
+  echo Failed to save sync config.
   pause
   exit /b 1
 )

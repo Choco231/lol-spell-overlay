@@ -744,7 +744,7 @@
     const sync = {
       enabled: false,
       serverUrl: "",
-      room: "default",
+      room: "team1",
       canControl: true,
       source: null,
       applyingRemote: false,
@@ -776,7 +776,7 @@
       if (!config?.enabled || !config.serverUrl) return;
       sync.enabled = true;
       sync.serverUrl = config.serverUrl.replace(/\/+$/, "");
-      sync.room = String(config.room || "default").trim() || "default";
+      sync.room = String(config.room || "team1").trim() || "team1";
       sync.canControl = config.canControl !== false;
       fetchRemoteState();
       connectSyncEvents();

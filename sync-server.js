@@ -3,6 +3,7 @@ const os = require("node:os");
 
 const PORT = Number(process.env.LOL_SPELL_SYNC_PORT || 17898);
 const LANES = ["TOP", "JUG", "MID", "ADC", "SUP"];
+const ALLOWED_ROOMS = new Set(["team1", "team2", "team3"]);
 const defaultState = {
   slots: [
     [{ id: "SummonerFlash", startedAt: 0, duration: 0 }, { id: "SummonerTeleport", startedAt: 0, duration: 0 }],
@@ -16,22 +17,26 @@ const defaultState = {
 };
 
 let state = structuredClone(defaultState);
-const states = new Map([["default", state]]);
+const states = new Map([["team1", state]]);
 const clients = new Map();
 
 function normalizeRoom(value) {
-  const normalized = String(value || "default")
+  const normalized = String(value || "team1")
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9_-]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 32);
-  return normalized || "default";
+  return normalized || "team1";
 }
 
 function roomFromRequest(req) {
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
   return normalizeRoom(url.searchParams.get("room"));
+}
+
+function isAllowedRoom(room) {
+  return ALLOWED_ROOMS.has(room);
 }
 
 function stateForRoom(room) {
@@ -100,12 +105,16 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && req.url === "/health") {
-    return sendJson(res, 200, { ok: true, port: PORT, rooms: states.size });
+    return sendJson(res, 200, { ok: true, port: PORT, rooms: [...ALLOWED_ROOMS] });
   }
 
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
   const pathname = url.pathname;
   const room = roomFromRequest(req);
+
+  if (!isAllowedRoom(room)) {
+    return sendJson(res, 400, { ok: false, error: "invalid room", rooms: [...ALLOWED_ROOMS] });
+  }
 
   if (req.method === "GET" && pathname === "/state") {
     return sendJson(res, 200, { room, ...stateForRoom(room) });
