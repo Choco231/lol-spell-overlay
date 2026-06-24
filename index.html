@@ -588,25 +588,6 @@
       display: none;
     }
 
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%);
-      padding: 9px 12px;
-      border-radius: 7px;
-      background: rgba(11, 16, 25, .94);
-      border: 1px solid var(--line);
-      color: var(--text);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .18s ease;
-      z-index: 20;
-      font-size: 13px;
-    }
-
-    .toast.show { opacity: 1; }
-
     .electron-only {
       display: none;
     }
@@ -695,8 +676,6 @@
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
-
   <script>
     const DDRAGON_VERSION = "16.11.1";
     const CDN = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}`;
@@ -754,7 +733,6 @@
     const board = document.querySelector("#board");
     const modal = document.querySelector("#modal");
     const spellPicker = document.querySelector("#spellPicker");
-    const toast = document.querySelector("#toast");
     const isElectron = Boolean(window.overlayAPI);
 
     init();
@@ -793,9 +771,7 @@
         const response = await fetch(syncUrl("/state"), { cache: "no-store" });
         if (!response.ok) throw new Error("state request failed");
         applyRemoteState(await response.json());
-      } catch {
-        flash("Sync server disconnected.");
-      }
+      } catch {}
     }
 
     function connectSyncEvents() {
@@ -831,7 +807,6 @@
     async function publishSharedState() {
       if (!sync.enabled || sync.applyingRemote) return;
       if (!sync.canControl) {
-        flash("View only.");
         return;
       }
       try {
@@ -843,9 +818,7 @@
             mods: state.mods
           })
         });
-      } catch {
-        flash("Sync send failed.");
-      }
+      } catch {}
     }
 
     async function loadDdragonSpells() {
@@ -863,10 +836,7 @@
             file: spell.image.full
           }))
           .sort((a, b) => FALLBACK_SPELLS.findIndex(spell => spell.id === a.id) - FALLBACK_SPELLS.findIndex(spell => spell.id === b.id));
-        flash("최신 Data Dragon 스펠 데이터를 불러왔습니다.");
-      } catch {
-        flash("오프라인 기본 스펠 데이터로 실행합니다.");
-      }
+      } catch {}
     }
 
     function bindControls() {
@@ -1061,7 +1031,6 @@
       });
       if (changed) {
         saveState();
-        flash("스펠이 돌아왔습니다.");
       }
       renderBoard();
     }
@@ -1168,13 +1137,6 @@
           };
         });
       });
-    }
-
-    function flash(message) {
-      toast.textContent = message;
-      toast.classList.add("show");
-      clearTimeout(flash.timer);
-      flash.timer = setTimeout(() => toast.classList.remove("show"), 1600);
     }
 
     function beep() {
