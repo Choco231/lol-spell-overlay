@@ -659,7 +659,6 @@
         <label class="control"><input type="checkbox" id="ionian"> 아이오니아 장화</label>
         <label class="control"><input type="checkbox" id="unleashed"> 강화 텔 적용</label>
         <label class="control">투명도 <input type="range" id="opacity" min="45" max="100" value="78"></label>
-        <button id="soundBtn" class="ghost">소리 OFF</button>
         <button id="seedBtn" class="ghost">자주 쓰는 조합</button>
       </div>
       <div class="board" id="board"></div>
@@ -716,8 +715,7 @@
       spells: FALLBACK_SPELLS,
       slots: DEFAULTS.map(pair => pair.map(id => ({ id, startedAt: 0, duration: 0 }))),
       mods: DEFAULT_MODS.map(mod => ({ ...mod })),
-      picker: null,
-      sound: false
+      picker: null
     };
 
     const sync = {
@@ -842,12 +840,6 @@
     function bindControls() {
       document.querySelector("#closeBtn")?.addEventListener("click", () => {
         window.overlayAPI?.close();
-      });
-
-      document.querySelector("#soundBtn").addEventListener("click", event => {
-        state.sound = !state.sound;
-        event.currentTarget.textContent = state.sound ? "소리 ON" : "소리 OFF";
-        saveState();
       });
 
       document.querySelector("#seedBtn").addEventListener("click", () => {
@@ -1026,7 +1018,6 @@
           slot.startedAt = 0;
           slot.duration = 0;
           changed = true;
-          if (state.sound) beep();
         }
       });
       if (changed) {
@@ -1078,7 +1069,6 @@
       const data = {
         slots: state.slots,
         mods: state.mods,
-        sound: state.sound,
         cosmic: document.querySelector("#cosmic")?.checked || false,
         ionian: document.querySelector("#ionian")?.checked || false,
         unleashed: state.mods[0]?.unleashed || false,
@@ -1105,14 +1095,12 @@
           }));
           state.mods[0].unleashed = Boolean(data.unleashed);
         }
-        state.sound = Boolean(data.sound);
         requestAnimationFrame(() => {
           document.querySelector("#cosmic").checked = Boolean(data.cosmic);
           document.querySelector("#ionian").checked = Boolean(data.ionian);
           document.querySelector("#unleashed").checked = Boolean(state.mods[0]?.unleashed);
           document.querySelector("#opacity").value = data.opacity || "78";
           document.querySelector("#topOpacity").value = data.opacity || "78";
-          document.querySelector("#soundBtn").textContent = state.sound ? "소리 ON" : "소리 OFF";
           document.querySelector("#opacity").dispatchEvent(new Event("input"));
         });
       } catch {
@@ -1137,20 +1125,6 @@
           };
         });
       });
-    }
-
-    function beep() {
-      const context = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = context.createOscillator();
-      const gain = context.createGain();
-      osc.frequency.value = 880;
-      gain.gain.value = .05;
-      osc.connect(gain).connect(context.destination);
-      osc.start();
-      setTimeout(() => {
-        osc.stop();
-        context.close();
-      }, 160);
     }
 
     function makeDraggable() {
