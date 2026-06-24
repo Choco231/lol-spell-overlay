@@ -109,7 +109,7 @@ ipcMain.handle("overlay:get-sync-config", () => {
     if (!fs.existsSync(syncConfigPath)) {
       return { enabled: false, serverUrl: "", canControl: true };
     }
-    const config = JSON.parse(fs.readFileSync(syncConfigPath, "utf8"));
+    const config = JSON.parse(fs.readFileSync(syncConfigPath, "utf8").replace(/^\uFEFF/, ""));
     return {
       enabled: Boolean(config.enabled),
       serverUrl: String(config.serverUrl || "").replace(/\/+$/, ""),
@@ -120,3 +120,4 @@ ipcMain.handle("overlay:get-sync-config", () => {
     return { enabled: false, serverUrl: "", canControl: true };
   }
 });
+

@@ -30,4 +30,10 @@ echo.
 
 start "" wscript.exe "%~dp0run-overlay.vbs"
 
+echo Overlay launch command was sent.
+echo If the overlay does not appear, run install_run.cmd first and try again.
+echo.
+pause
+
+
 
