@@ -64,9 +64,12 @@ if not exist "node_modules\electron\dist\electron.exe" (
 echo.
 echo Setup complete.
 echo.
-echo Next:
-echo   Run client_run.cmd
-echo   or double-click 클라이언트_실행.cmd
+echo Starting client setup...
 echo.
-pause
+
+call "%~dp0client_run.cmd"
+
+echo.
+echo Setup script finished.
+echo.
 
