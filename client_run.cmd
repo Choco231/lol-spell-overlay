@@ -10,21 +10,38 @@ if not exist "node_modules\electron\dist\electron.exe" (
 )
 
 echo.
-echo Enter the server URL shared by the host.
-echo Example: http://13.125.10.20:17898
+echo Enter the server URL.
+echo Press Enter to use the default VPS server.
 echo.
-set /p SERVER_URL=Server URL: 
+set "DEFAULT_SERVER_URL=http://52.78.57.73:17898"
+set /p SERVER_URL=Server URL [%DEFAULT_SERVER_URL%]: 
 
 if "%SERVER_URL%"=="" (
-  echo No server URL entered.
+  set "SERVER_URL=%DEFAULT_SERVER_URL%"
+)
+
+echo.
+echo Enter a room code. People using the same room code share spell timers.
+echo Use English letters, numbers, dash, or underscore. Example: team1
+echo.
+set /p ROOM_CODE=Room code: 
+
+if "%ROOM_CODE%"=="" (
+  echo No room code entered.
   pause
   exit /b 1
 )
 
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$url = '%SERVER_URL%'.Trim().TrimEnd('/'); $cfg = [ordered]@{ enabled = $true; serverUrl = $url; canControl = $true }; $cfg | ConvertTo-Json | Set-Content -LiteralPath 'sync-client-config.json' -Encoding UTF8"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$url = $env:SERVER_URL.Trim().TrimEnd('/'); $room = $env:ROOM_CODE.Trim().ToLower() -replace '[^a-z0-9_-]+','-'; $room = $room.Trim('-'); if (-not $room) { throw 'Invalid room code' }; $cfg = [ordered]@{ enabled = $true; serverUrl = $url; room = $room; canControl = $true }; $cfg | ConvertTo-Json | Set-Content -LiteralPath 'sync-client-config.json' -Encoding UTF8"
+
+if errorlevel 1 (
+  echo Failed to save sync config. Use only English letters, numbers, dash, or underscore for room code.
+  pause
+  exit /b 1
+)
 
 echo.
-echo Saved server URL.
+echo Saved server URL and room code.
 echo Starting overlay...
 echo.
 

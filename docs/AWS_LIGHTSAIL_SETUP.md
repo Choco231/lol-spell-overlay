@@ -50,7 +50,7 @@ curl http://127.0.0.1:17898/health
 정상이면 이런 식으로 나옵니다.
 
 ```json
-{"ok":true,"port":17898}
+{"ok":true,"port":17898,"rooms":1}
 ```
 
 ## 3. 서비스 확인
@@ -73,6 +73,26 @@ sudo journalctl -u lol-spell-sync -f
 sudo systemctl restart lol-spell-sync
 ```
 
+## 3-1. GitHub 최신 버전으로 재설치
+
+기존 서버 파일을 지우고 GitHub 최신 버전으로 다시 설치하려면 Lightsail SSH에서 실행합니다.
+
+```bash
+sudo systemctl stop lol-spell-sync || true
+cd ~
+rm -rf lol-spell-overlay
+sudo rm -rf /opt/lol-spell-overlay
+git clone https://github.com/Choco231/lol-spell-overlay.git
+cd lol-spell-overlay
+sudo bash deploy/install-lightsail-sync.sh
+```
+
+설치 후 외부 PC에서 아래 주소가 열리면 정상입니다.
+
+```text
+http://52.78.57.73:17898/health
+```
+
 ## 4. 클라이언트에서 접속
 
 각 사용자 PC에서는 기존 파일을 실행합니다.
@@ -81,17 +101,20 @@ sudo systemctl restart lol-spell-sync
 클라이언트_실행.cmd
 ```
 
-서버 주소에는 Lightsail 공인 IP를 넣습니다.
+서버 주소에는 Lightsail 공인 IP를 넣습니다. 이 저장소의 기본값은 아래 서버로 잡혀 있습니다.
 
 ```text
-http://서버공인IP:17898
+http://52.78.57.73:17898
 ```
 
-예시:
+서로 다른 팀이 따로 스펠 체크를 쓰려면 방 코드를 다르게 입력합니다.
 
 ```text
-http://13.125.10.20:17898
+팀 A: team1
+팀 B: team2
 ```
+
+같은 방 코드를 입력한 사람끼리만 상태가 동기화됩니다. 방 코드는 영문, 숫자, `-`, `_` 사용을 권장합니다.
 
 ## 5. 0.3초 이하 동기화 기준
 

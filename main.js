@@ -113,6 +113,7 @@ ipcMain.handle("overlay:get-sync-config", () => {
     return {
       enabled: Boolean(config.enabled),
       serverUrl: String(config.serverUrl || "").replace(/\/+$/, ""),
+      room: String(config.room || "default"),
       canControl: config.canControl !== false
     };
   } catch (error) {

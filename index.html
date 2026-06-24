@@ -744,6 +744,7 @@
     const sync = {
       enabled: false,
       serverUrl: "",
+      room: "default",
       canControl: true,
       source: null,
       applyingRemote: false,
@@ -775,15 +776,21 @@
       if (!config?.enabled || !config.serverUrl) return;
       sync.enabled = true;
       sync.serverUrl = config.serverUrl.replace(/\/+$/, "");
+      sync.room = String(config.room || "default").trim() || "default";
       sync.canControl = config.canControl !== false;
       fetchRemoteState();
       connectSyncEvents();
     }
 
+    function syncUrl(path) {
+      const separator = path.includes("?") ? "&" : "?";
+      return `${sync.serverUrl}${path}${separator}room=${encodeURIComponent(sync.room)}`;
+    }
+
     async function fetchRemoteState() {
       if (!sync.enabled || !sync.serverUrl) return;
       try {
-        const response = await fetch(`${sync.serverUrl}/state`, { cache: "no-store" });
+        const response = await fetch(syncUrl("/state"), { cache: "no-store" });
         if (!response.ok) throw new Error("state request failed");
         applyRemoteState(await response.json());
       } catch {
@@ -795,7 +802,7 @@
       if (!sync.enabled || !sync.serverUrl || !window.EventSource) return;
       clearTimeout(sync.retryTimer);
       sync.source?.close();
-      sync.source = new EventSource(`${sync.serverUrl}/events`);
+      sync.source = new EventSource(syncUrl("/events"));
       sync.source.addEventListener("state", event => {
         applyRemoteState(JSON.parse(event.data));
       });
@@ -828,7 +835,7 @@
         return;
       }
       try {
-        await fetch(`${sync.serverUrl}/state`, {
+        await fetch(syncUrl("/state"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

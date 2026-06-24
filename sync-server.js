@@ -16,7 +16,37 @@ const defaultState = {
 };
 
 let state = structuredClone(defaultState);
-const clients = new Set();
+const states = new Map([["default", state]]);
+const clients = new Map();
+
+function normalizeRoom(value) {
+  const normalized = String(value || "default")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 32);
+  return normalized || "default";
+}
+
+function roomFromRequest(req) {
+  const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
+  return normalizeRoom(url.searchParams.get("room"));
+}
+
+function stateForRoom(room) {
+  if (!states.has(room)) {
+    states.set(room, structuredClone(defaultState));
+  }
+  return states.get(room);
+}
+
+function clientsForRoom(room) {
+  if (!clients.has(room)) {
+    clients.set(room, new Set());
+  }
+  return clients.get(room);
+}
 
 function sendJson(res, code, data) {
   res.writeHead(code, {
@@ -28,13 +58,13 @@ function sendJson(res, code, data) {
   res.end(JSON.stringify(data));
 }
 
-function broadcast() {
-  const payload = `event: state\ndata: ${JSON.stringify(state)}\n\n`;
-  for (const res of clients) {
+function broadcast(room) {
+  const payload = `event: state\ndata: ${JSON.stringify(stateForRoom(room))}\n\n`;
+  for (const res of clientsForRoom(room)) {
     try {
       res.write(payload);
     } catch {
-      clients.delete(res);
+      clientsForRoom(room).delete(res);
     }
   }
 }
@@ -70,27 +100,31 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && req.url === "/health") {
-    return sendJson(res, 200, { ok: true, port: PORT });
+    return sendJson(res, 200, { ok: true, port: PORT, rooms: states.size });
   }
 
-  if (req.method === "GET" && req.url === "/state") {
-    return sendJson(res, 200, state);
+  const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
+  const pathname = url.pathname;
+  const room = roomFromRequest(req);
+
+  if (req.method === "GET" && pathname === "/state") {
+    return sendJson(res, 200, { room, ...stateForRoom(room) });
   }
 
-  if (req.method === "GET" && req.url === "/events") {
+  if (req.method === "GET" && pathname === "/events") {
     res.writeHead(200, {
       "Access-Control-Allow-Origin": "*",
       "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-cache, no-transform",
       "Connection": "keep-alive"
     });
-    clients.add(res);
-    res.write(`event: state\ndata: ${JSON.stringify(state)}\n\n`);
-    req.on("close", () => clients.delete(res));
+    clientsForRoom(room).add(res);
+    res.write(`event: state\ndata: ${JSON.stringify({ room, ...stateForRoom(room) })}\n\n`);
+    req.on("close", () => clientsForRoom(room).delete(res));
     return;
   }
 
-  if (req.method === "POST" && req.url === "/state") {
+  if (req.method === "POST" && pathname === "/state") {
     try {
       const body = await readBody(req);
       const nextState = JSON.parse(body || "{}");
@@ -102,8 +136,9 @@ const server = http.createServer(async (req, res) => {
         mods: nextState.mods,
         updatedAt: Date.now()
       };
-      broadcast();
-      return sendJson(res, 200, { ok: true });
+      states.set(room, state);
+      broadcast(room);
+      return sendJson(res, 200, { ok: true, room });
     } catch (error) {
       return sendJson(res, 400, { ok: false, error: String(error.message || error) });
     }
