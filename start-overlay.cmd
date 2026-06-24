@@ -50,7 +50,7 @@ if not exist "node_modules\electron\dist\electron.exe" (
 
 if not exist "node_modules\electron\dist\electron.exe" (
   echo Electron install is still incomplete.
-  echo Try deleting the node_modules folder and run setup-and-run.cmd again.
+  echo Try deleting the node_modules folder and run install_run.cmd again.
   pause
   exit /b 1
 )
