@@ -3,5 +3,8 @@ node_modules/
 .electron-download/
 overlay-debug.log
 overlay-runtime.log
+sync-client-config.json
+sync-server-runtime.log
+sync-server-runtime.err.log
 npm-debug.log*
 *.tmp

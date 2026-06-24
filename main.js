@@ -5,6 +5,7 @@ const { app, BrowserWindow, globalShortcut, ipcMain, screen } = require("electro
 let mainWindow;
 const logPath = path.join(__dirname, "overlay-debug.log");
 const userDataPath = path.join(__dirname, ".overlay-user-data");
+const syncConfigPath = path.join(__dirname, "sync-client-config.json");
 const DEFAULT_WIDTH = 140;
 const DEFAULT_HEIGHT = 272;
 
@@ -101,4 +102,21 @@ ipcMain.handle("overlay:reset-window", () => {
   if (!mainWindow) return;
   mainWindow.setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
   mainWindow.center();
+});
+
+ipcMain.handle("overlay:get-sync-config", () => {
+  try {
+    if (!fs.existsSync(syncConfigPath)) {
+      return { enabled: false, serverUrl: "", canControl: true };
+    }
+    const config = JSON.parse(fs.readFileSync(syncConfigPath, "utf8"));
+    return {
+      enabled: Boolean(config.enabled),
+      serverUrl: String(config.serverUrl || "").replace(/\/+$/, ""),
+      canControl: config.canControl !== false
+    };
+  } catch (error) {
+    log(`sync config read failed: ${error.stack || error}`);
+    return { enabled: false, serverUrl: "", canControl: true };
+  }
 });

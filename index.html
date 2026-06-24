@@ -741,6 +741,15 @@
       sound: false
     };
 
+    const sync = {
+      enabled: false,
+      serverUrl: "",
+      canControl: true,
+      source: null,
+      applyingRemote: false,
+      retryTimer: null
+    };
+
     const board = document.querySelector("#board");
     const modal = document.querySelector("#modal");
     const spellPicker = document.querySelector("#spellPicker");
@@ -752,11 +761,84 @@
     async function init() {
       if (isElectron) document.body.classList.add("electron");
       loadSavedState();
+      await initSync();
       await loadDdragonSpells();
       renderPicker();
       renderBoard();
       bindControls();
       setInterval(tick, 400);
+    }
+
+    async function initSync() {
+      if (!window.overlayAPI?.getSyncConfig) return;
+      const config = await window.overlayAPI.getSyncConfig();
+      if (!config?.enabled || !config.serverUrl) return;
+      sync.enabled = true;
+      sync.serverUrl = config.serverUrl.replace(/\/+$/, "");
+      sync.canControl = config.canControl !== false;
+      fetchRemoteState();
+      connectSyncEvents();
+    }
+
+    async function fetchRemoteState() {
+      if (!sync.enabled || !sync.serverUrl) return;
+      try {
+        const response = await fetch(`${sync.serverUrl}/state`, { cache: "no-store" });
+        if (!response.ok) throw new Error("state request failed");
+        applyRemoteState(await response.json());
+      } catch {
+        flash("Sync server disconnected.");
+      }
+    }
+
+    function connectSyncEvents() {
+      if (!sync.enabled || !sync.serverUrl || !window.EventSource) return;
+      clearTimeout(sync.retryTimer);
+      sync.source?.close();
+      sync.source = new EventSource(`${sync.serverUrl}/events`);
+      sync.source.addEventListener("state", event => {
+        applyRemoteState(JSON.parse(event.data));
+      });
+      sync.source.onerror = () => {
+        sync.source?.close();
+        sync.retryTimer = setTimeout(connectSyncEvents, 1500);
+      };
+    }
+
+    function applyRemoteState(nextState) {
+      if (!nextState || typeof nextState !== "object") return;
+      sync.applyingRemote = true;
+      if (Array.isArray(nextState.slots)) state.slots = nextState.slots;
+      if (Array.isArray(nextState.mods)) {
+        state.mods = DEFAULT_MODS.map((mod, index) => ({ ...mod, ...(nextState.mods[index] || {}) }));
+        state.mods.forEach((mod, index) => {
+          if (index !== 0) mod.unleashed = false;
+        });
+      }
+      normalizeSlots();
+      saveState();
+      renderBoard();
+      sync.applyingRemote = false;
+    }
+
+    async function publishSharedState() {
+      if (!sync.enabled || sync.applyingRemote) return;
+      if (!sync.canControl) {
+        flash("View only.");
+        return;
+      }
+      try {
+        await fetch(`${sync.serverUrl}/state`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            slots: state.slots,
+            mods: state.mods
+          })
+        });
+      } catch {
+        flash("Sync send failed.");
+      }
     }
 
     async function loadDdragonSpells() {
@@ -795,6 +877,7 @@
         state.slots = POPULAR.map(pair => pair.map(id => ({ id, startedAt: 0, duration: 0 })));
         saveState();
         renderBoard();
+        publishSharedState();
       });
 
       document.querySelector("#closeModal").addEventListener("click", closePicker);
@@ -852,6 +935,7 @@
             if (rowIndex !== 0) state.mods[rowIndex].unleashed = false;
             saveState();
             renderBoard();
+            publishSharedState();
           });
         });
         const spellsEl = rowEl.querySelector(".spells");
@@ -924,6 +1008,7 @@
           closePicker();
           saveState();
           renderBoard();
+          publishSharedState();
         });
         spellPicker.appendChild(button);
       });
@@ -954,6 +1039,7 @@
       }
       saveState();
       renderBoard();
+      publishSharedState();
     }
 
     function tick() {
