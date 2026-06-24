@@ -698,14 +698,14 @@
     const DEFAULT_MODS = LANES.map(() => ({ cosmic: false, ionian: false, unleashed: false }));
     const DEFAULTS = [
       ["SummonerFlash", "SummonerTeleport"],
-      ["SummonerFlash"],
+      ["SummonerFlash", TOP_QUEST_TELEPORT_ID],
       ["SummonerFlash", "SummonerDot"],
       ["SummonerFlash", "SummonerHeal"],
       ["SummonerFlash", "SummonerExhaust"]
     ];
     const POPULAR = [
       ["SummonerFlash", "SummonerTeleport"],
-      ["SummonerFlash"],
+      ["SummonerFlash", TOP_QUEST_TELEPORT_ID],
       ["SummonerFlash", "SummonerTeleport"],
       ["SummonerFlash", "SummonerBarrier"],
       ["SummonerFlash", "SummonerHeal"]
@@ -931,6 +931,7 @@
       const remaining = getRemaining(slot);
       const total = adjustedCooldown(spell, rowIndex);
       const cooling = remaining > 0;
+      const fixedSpell = rowIndex === 1 && slotIndex === 1;
       const el = document.createElement("article");
       el.className = `spell ${cooling ? "cooling" : "ready"}`;
       el.style.setProperty("--progress", cooling ? `${Math.max(0, Math.min(100, remaining / total * 100))}%` : "0%");
@@ -944,7 +945,7 @@
         </div>
         <div class="tools">
           <div class="time">${cooling ? formatTime(remaining) : ""}</div>
-          <button class="mini" title="스펠 변경">변경</button>
+          ${fixedSpell ? "" : `<button class="mini" title="스펠 변경">변경</button>`}
         </div>
         <div class="meter"></div>
       `;
@@ -955,16 +956,17 @@
       });
       el.querySelector(".icon").addEventListener("contextmenu", event => {
         event.preventDefault();
+        if (fixedSpell) return;
         openPicker(rowIndex, slotIndex);
       });
-      el.querySelector(".mini").addEventListener("click", () => openPicker(rowIndex, slotIndex));
+      el.querySelector(".mini")?.addEventListener("click", () => openPicker(rowIndex, slotIndex));
       return el;
     }
 
     function renderPicker() {
       spellPicker.innerHTML = "";
       const [rowIndex] = state.picker || [];
-      const pickerSpells = rowIndex === 0 ? [TOP_QUEST_TELEPORT_SPELL, ...state.spells] : state.spells;
+      const pickerSpells = state.spells;
       pickerSpells.forEach(spell => {
         const button = document.createElement("button");
         button.className = "pick";
@@ -984,6 +986,7 @@
     }
 
     function openPicker(rowIndex, slotIndex) {
+      if (rowIndex === 1 && slotIndex === 1) return;
       state.picker = [rowIndex, slotIndex];
       renderPicker();
       modal.classList.add("open");
@@ -1028,7 +1031,8 @@
 
     function adjustedCooldown(spell, rowIndex = 0) {
       const base = baseCooldown(spell, rowIndex);
-      const mods = state.mods[rowIndex] || DEFAULT_MODS[rowIndex] || DEFAULT_MODS[0];
+      const modIndex = spell.id === TOP_QUEST_TELEPORT_ID ? 0 : rowIndex;
+      const mods = state.mods[modIndex] || DEFAULT_MODS[modIndex] || DEFAULT_MODS[0];
       const haste = (mods.cosmic ? 18 : 0) + (mods.ionian ? 10 : 0);
       return Math.round(base / (1 + haste / 100));
     }
@@ -1113,9 +1117,25 @@
         const existing = Array.isArray(state.slots[rowIndex]) ? state.slots[rowIndex] : [];
         const cleaned = existing.filter(slot => {
           if (!slot?.id || slot.id === "SummonerSmite") return false;
-          if (slot.id === TOP_QUEST_TELEPORT_ID && rowIndex !== 0) return false;
+          if (slot.id === TOP_QUEST_TELEPORT_ID && rowIndex !== 1) return false;
           return true;
         });
+        if (rowIndex === 1) {
+          const normalSlot = cleaned.find(slot => slot.id !== TOP_QUEST_TELEPORT_ID) || { id: "SummonerFlash", startedAt: 0, duration: 0 };
+          const questSlot = cleaned.find(slot => slot.id === TOP_QUEST_TELEPORT_ID) || { id: TOP_QUEST_TELEPORT_ID, startedAt: 0, duration: 0 };
+          return [
+            {
+              id: normalSlot.id || "SummonerFlash",
+              startedAt: normalSlot.startedAt || 0,
+              duration: normalSlot.duration || 0
+            },
+            {
+              id: TOP_QUEST_TELEPORT_ID,
+              startedAt: questSlot.startedAt || 0,
+              duration: questSlot.duration || 0
+            }
+          ];
+        }
         return defaults.map((defaultId, slotIndex) => {
           const slot = cleaned[slotIndex] || { id: defaultId, startedAt: 0, duration: 0 };
           return {

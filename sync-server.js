@@ -7,7 +7,7 @@ const ALLOWED_ROOMS = new Set(["team1", "team2", "team3"]);
 const defaultState = {
   slots: [
     [{ id: "SummonerFlash", startedAt: 0, duration: 0 }, { id: "SummonerTeleport", startedAt: 0, duration: 0 }],
-    [{ id: "SummonerFlash", startedAt: 0, duration: 0 }],
+    [{ id: "SummonerFlash", startedAt: 0, duration: 0 }, { id: "TopQuestTeleport", startedAt: 0, duration: 0 }],
     [{ id: "SummonerFlash", startedAt: 0, duration: 0 }, { id: "SummonerDot", startedAt: 0, duration: 0 }],
     [{ id: "SummonerFlash", startedAt: 0, duration: 0 }, { id: "SummonerHeal", startedAt: 0, duration: 0 }],
     [{ id: "SummonerFlash", startedAt: 0, duration: 0 }, { id: "SummonerExhaust", startedAt: 0, duration: 0 }]
