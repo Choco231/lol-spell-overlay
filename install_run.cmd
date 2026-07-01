@@ -67,10 +67,31 @@ if not exist "node_modules\electron\dist\electron.exe" (
 if not exist "node_modules\electron\dist\electron.exe" (
   echo Reinstalling Electron...
   call npm.cmd install --no-audit --no-fund
+  call node "node_modules\electron\install.js"
 )
 
 if not exist "node_modules\electron\dist\electron.exe" (
-  echo Electron install is incomplete. Try deleting node_modules and run this file again.
+  echo Clean reinstalling dependencies...
+  if exist "node_modules" (
+    rmdir /s /q "node_modules"
+  )
+  call npm.cmd install --no-audit --no-fund
+  if errorlevel 1 (
+    echo npm clean install failed.
+    pause
+    exit /b 1
+  )
+  call node "node_modules\electron\install.js"
+)
+
+if not exist "node_modules\electron\dist\electron.exe" (
+  echo Trying direct Electron zip repair...
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0repair-electron.ps1"
+)
+
+if not exist "node_modules\electron\dist\electron.exe" (
+  echo Electron install is incomplete.
+  echo Close this window and run install_run.cmd again.
   pause
   exit /b 1
 )
