@@ -6,7 +6,7 @@ cd /d "%~dp0"
 if not exist "node_modules\.bin\electron.cmd" (
   echo Electron dependency is missing.
   echo Installing dependencies first...
-  call npm.cmd install
+  call npm.cmd install --no-audit --no-fund
   if errorlevel 1 (
     echo.
     echo Install failed. Press any key to close.
@@ -33,13 +33,13 @@ if not exist "node_modules\electron\dist\electron.exe" (
   if exist "node_modules\electron" (
     rmdir /s /q "node_modules\electron"
   )
-  call npm.cmd install
+  call npm.cmd install --no-audit --no-fund
 )
 
 if not exist "node_modules\electron\dist\electron.exe" (
   echo Electron reinstall did not create electron.exe.
   echo Forcing Electron install...
-  call npm.cmd install electron@31.7.7 --save-dev --force
+  call npm.cmd install --no-audit --no-fund
 )
 
 if not exist "node_modules\electron\dist\electron.exe" (

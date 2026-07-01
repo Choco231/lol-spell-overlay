@@ -9,6 +9,6 @@
     "sync-server": "node sync-server.js"
   },
   "devDependencies": {
-    "electron": "^31.7.7"
+    "electron": "^43.0.0"
   }
 }

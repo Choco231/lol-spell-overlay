@@ -27,6 +27,20 @@ if errorlevel 1 (
   set "PATH=%ProgramFiles%\nodejs;%PATH%"
 )
 
+node -e "process.exit(Number(process.versions.node.split('.')[0]) >= 22 ? 0 : 1)" >nul 2>nul
+if errorlevel 1 (
+  echo Node.js 22 or newer is required.
+  echo Upgrading Node.js LTS...
+  winget upgrade --id OpenJS.NodeJS.LTS -e --source winget --accept-package-agreements --accept-source-agreements
+  set "PATH=%ProgramFiles%\nodejs;%PATH%"
+  node -e "process.exit(Number(process.versions.node.split('.')[0]) >= 22 ? 0 : 1)" >nul 2>nul
+  if errorlevel 1 (
+    echo Node.js is still too old. Close this window, open it again, and run this file again.
+    pause
+    exit /b 1
+  )
+)
+
 where npm.cmd >nul 2>nul
 if errorlevel 1 (
   echo npm.cmd was not found. If Node.js was just installed, close this window and run again.
@@ -37,7 +51,7 @@ if errorlevel 1 (
 echo.
 echo [3/3] Installing overlay dependencies...
 if not exist "node_modules\.bin\electron.cmd" (
-  call npm.cmd install
+  call npm.cmd install --no-audit --no-fund
   if errorlevel 1 (
     echo npm install failed.
     pause
@@ -52,7 +66,7 @@ if not exist "node_modules\electron\dist\electron.exe" (
 
 if not exist "node_modules\electron\dist\electron.exe" (
   echo Reinstalling Electron...
-  call npm.cmd install electron@31.7.7 --save-dev --force
+  call npm.cmd install --no-audit --no-fund
 )
 
 if not exist "node_modules\electron\dist\electron.exe" (
