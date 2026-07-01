@@ -370,14 +370,6 @@
       font-size: 11px;
     }
 
-    .compact #closeBtn {
-      position: relative;
-      left: -7px;
-      background: rgba(0, 0, 0, .38);
-      border-color: rgba(255, 255, 255, .16);
-      color: rgba(255, 255, 255, .72);
-    }
-
     .compact .panel {
       padding: 2px;
       background: rgba(2, 6, 13, .72);
@@ -588,15 +580,6 @@
       display: none;
     }
 
-    .electron-only {
-      display: none;
-    }
-
-    body.electron .electron-only {
-      display: inline-flex;
-      align-items: center;
-    }
-
     @media (max-width: 640px) {
       body { padding: 8px; }
       .topbar { align-items: flex-start; }
@@ -647,9 +630,6 @@
     <header class="topbar" id="dragHandle">
       <div class="opacity-control">
         <input type="range" id="topOpacity" min="45" max="100" value="78" title="투명도">
-      </div>
-      <div class="actions">
-        <button id="closeBtn" class="danger electron-only" title="닫기">X</button>
       </div>
     </header>
 
@@ -838,10 +818,6 @@
     }
 
     function bindControls() {
-      document.querySelector("#closeBtn")?.addEventListener("click", () => {
-        window.overlayAPI?.close();
-      });
-
       document.querySelector("#seedBtn").addEventListener("click", () => {
         state.slots = POPULAR.map(pair => pair.map(id => ({ id, startedAt: 0, duration: 0 })));
         saveState();
