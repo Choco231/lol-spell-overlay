@@ -9,16 +9,8 @@ if not exist "node_modules\electron\dist\electron.exe" (
   exit /b 1
 )
 
-echo.
-echo Enter the server URL.
-echo Press Enter to use the default VPS server.
-echo.
 set "DEFAULT_SERVER_URL=http://52.78.57.73:17898"
-set /p SERVER_URL=Server URL [%DEFAULT_SERVER_URL%]: 
-
-if "%SERVER_URL%"=="" (
-  set "SERVER_URL=%DEFAULT_SERVER_URL%"
-)
+set "SERVER_URL=%DEFAULT_SERVER_URL%"
 
 echo.
 echo Select a room. People using the same room share spell timers.
@@ -47,7 +39,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo Saved server URL and room code.
+echo Saved room code.
 echo Starting overlay...
 echo.
 
