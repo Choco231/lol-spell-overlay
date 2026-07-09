@@ -936,7 +936,7 @@
       });
       el.querySelector(".icon").addEventListener("wheel", event => {
         event.preventDefault();
-        adjustSlotTime(rowIndex, slotIndex, event.deltaY < 0 ? 10 : -10);
+        adjustSlotTime(rowIndex, slotIndex, event.deltaY < 0 ? 5 : -5);
       }, { passive: false });
       el.querySelector(".icon").addEventListener("contextmenu", event => {
         event.preventDefault();
