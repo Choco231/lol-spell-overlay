@@ -708,6 +708,9 @@
       retryTimer: null
     };
 
+    const SPELL_CLICK_BLOCK_MS = 1000;
+    let spellClickBlockedUntil = 0;
+
     const board = document.querySelector("#board");
     const modal = document.querySelector("#modal");
     const spellPicker = document.querySelector("#spellPicker");
@@ -768,6 +771,7 @@
 
     function applyRemoteState(nextState) {
       if (!nextState || typeof nextState !== "object") return;
+      spellClickBlockedUntil = Date.now() + SPELL_CLICK_BLOCK_MS;
       sync.applyingRemote = true;
       if (Array.isArray(nextState.slots)) state.slots = nextState.slots;
       if (Array.isArray(nextState.mods)) {
@@ -980,6 +984,10 @@
     }
 
     function triggerSlot(rowIndex, slotIndex) {
+      const now = Date.now();
+      if (now < spellClickBlockedUntil) return;
+      spellClickBlockedUntil = now + SPELL_CLICK_BLOCK_MS;
+
       const slot = state.slots[rowIndex][slotIndex];
       if (getRemaining(slot) > 0) {
         slot.startedAt = 0;
