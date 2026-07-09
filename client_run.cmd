@@ -13,6 +13,8 @@ set "DEFAULT_SERVER_URL=http://52.78.57.73:17898"
 set "SERVER_URL=%DEFAULT_SERVER_URL%"
 
 echo.
+echo Server URL: %SERVER_URL%
+echo.
 echo Select a room. People using the same room share spell timers.
 echo 1. team1
 echo 2. team2
