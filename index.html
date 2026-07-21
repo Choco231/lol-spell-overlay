@@ -709,7 +709,7 @@
     };
 
     const SPELL_CLICK_BLOCK_MS = 1000;
-    let spellClickBlockedUntil = 0;
+    const spellClickBlockedUntil = {};
 
     const board = document.querySelector("#board");
     const modal = document.querySelector("#modal");
@@ -771,7 +771,7 @@
 
     function applyRemoteState(nextState) {
       if (!nextState || typeof nextState !== "object") return;
-      spellClickBlockedUntil = Date.now() + SPELL_CLICK_BLOCK_MS;
+      blockChangedSpellClicks(nextState.slots);
       sync.applyingRemote = true;
       if (Array.isArray(nextState.slots)) state.slots = nextState.slots;
       if (Array.isArray(nextState.mods)) {
@@ -985,8 +985,9 @@
 
     function triggerSlot(rowIndex, slotIndex) {
       const now = Date.now();
-      if (now < spellClickBlockedUntil) return;
-      spellClickBlockedUntil = now + SPELL_CLICK_BLOCK_MS;
+      const key = spellSlotKey(rowIndex, slotIndex);
+      if (now < (spellClickBlockedUntil[key] || 0)) return;
+      spellClickBlockedUntil[key] = now + SPELL_CLICK_BLOCK_MS;
 
       const slot = state.slots[rowIndex][slotIndex];
       if (getRemaining(slot) > 0) {
@@ -1000,6 +1001,30 @@
       saveState();
       renderBoard();
       publishSharedState();
+    }
+
+    function blockChangedSpellClicks(nextSlots) {
+      if (!Array.isArray(nextSlots)) return;
+      const blockedUntil = Date.now() + SPELL_CLICK_BLOCK_MS;
+      nextSlots.forEach((row, rowIndex) => {
+        if (!Array.isArray(row)) return;
+        row.forEach((nextSlot, slotIndex) => {
+          const currentSlot = state.slots[rowIndex]?.[slotIndex];
+          if (isSameSlotTimer(currentSlot, nextSlot)) return;
+          spellClickBlockedUntil[spellSlotKey(rowIndex, slotIndex)] = blockedUntil;
+        });
+      });
+    }
+
+    function isSameSlotTimer(a, b) {
+      return Boolean(a && b)
+        && a.id === b.id
+        && Number(a.startedAt || 0) === Number(b.startedAt || 0)
+        && Number(a.duration || 0) === Number(b.duration || 0);
+    }
+
+    function spellSlotKey(rowIndex, slotIndex) {
+      return `${rowIndex}:${slotIndex}`;
     }
 
     function adjustSlotTime(rowIndex, slotIndex, deltaSeconds) {
